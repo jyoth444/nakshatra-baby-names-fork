@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   title: "Nakshatra Baby Names Finder | Vedic Astrology Baby Names",
   description:
     "Find the perfect baby name based on Vedic astrology. Calculate Nakshatra, Rashi, and Pada from birth details and discover auspicious baby names with their meanings.",
+  verification: {
+       google: "2UiSM7E-Bjy833fB6g"
   keywords: [
     "nakshatra",
     "baby names",
