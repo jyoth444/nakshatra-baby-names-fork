@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://nakshatranames.com
+
+# Sitemaps
+Sitemap: https://nakshatranames.com/sitemap.xml
