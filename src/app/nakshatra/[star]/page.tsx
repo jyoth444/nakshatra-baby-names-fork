@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Star, ArrowLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Star, ArrowLeft, ChevronRight, Sparkles, BookOpen, HelpCircle } from "lucide-react";
 import { NAKSHATRA_DATA, getNakshatraBySlug } from "@/lib/nakshatraData";
 import { getNamesByNakshatra } from "@/lib/nameUtils";
+import { getNakshatraSEOContent } from "@/lib/nakshatraSEOContent";
 import NameCard from "@/components/shared/NameCard";
 
 interface Props {
@@ -18,8 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const nakshatra = getNakshatraBySlug(params.star);
   if (!nakshatra) return { title: "Nakshatra Not Found" };
 
-  const title = `${nakshatra.name} Nakshatra Baby Names | Starting Syllables & Meanings`;
-  const description = `Discover baby names for ${nakshatra.name} nakshatra. Find auspicious Indian baby names starting with ${nakshatra.syllables.join(", ")} syllables. ${nakshatra.description.slice(0, 100)}`;
+  const seo = getNakshatraSEOContent(params.star);
+  const title = seo?.seoTitle ?? `${nakshatra.name} Nakshatra Baby Names | Starting Syllables & Meanings`;
+  const description =
+    seo?.metaDescription ??
+    `Discover baby names for ${nakshatra.name} nakshatra. Find auspicious Indian baby names starting with ${nakshatra.syllables.join(", ")} syllables.`;
 
   return {
     title,
@@ -33,12 +37,19 @@ export default function NakshatraPage({ params }: Props) {
   const nakshatra = getNakshatraBySlug(params.star);
   if (!nakshatra) notFound();
 
+  const seo = getNakshatraSEOContent(params.star);
   const names = getNamesByNakshatra(nakshatra.name);
   const boyNames = names.filter((n) => n.gender === "boy");
   const girlNames = names.filter((n) => n.gender === "girl");
 
   const prevNakshatra = NAKSHATRA_DATA.find((n) => n.id === nakshatra.id - 1);
   const nextNakshatra = NAKSHATRA_DATA.find((n) => n.id === nakshatra.id + 1);
+
+  const allFeatured = seo
+    ? [...seo.popularNames, ...seo.uniqueNames, ...seo.modernNames]
+    : [];
+  const featuredBoys = allFeatured.filter((n) => n.gender === "boy" || n.gender === "unisex");
+  const featuredGirls = allFeatured.filter((n) => n.gender === "girl" || n.gender === "unisex");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -161,14 +172,14 @@ export default function NakshatraPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Main Names Grid */}
+          {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: "Total Names", value: names.length },
-                { label: "Boy Names", value: boyNames.length },
-                { label: "Girl Names", value: girlNames.length },
+                { label: "Total Names", value: names.length + allFeatured.length },
+                { label: "Boy Names", value: boyNames.length + featuredBoys.length },
+                { label: "Girl Names", value: girlNames.length + featuredGirls.length },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-gray-100 bg-white p-4 text-center shadow-sm">
                   <div className="text-2xl font-bold text-orange-500">{stat.value}+</div>
@@ -177,7 +188,24 @@ export default function NakshatraPage({ params }: Props) {
               ))}
             </div>
 
-            {/* Boy Names */}
+            {/* SEO Introduction */}
+            {seo && (
+              <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <BookOpen className="h-5 w-5 text-orange-500" />
+                  <h2 className="text-xl font-bold text-gray-900">
+                    About {nakshatra.name} Nakshatra Baby Names
+                  </h2>
+                </div>
+                <div className="prose prose-gray max-w-none text-gray-600 leading-relaxed space-y-4">
+                  {seo.introduction.split("\n\n").map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Boy Names from DB */}
             {boyNames.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -197,7 +225,7 @@ export default function NakshatraPage({ params }: Props) {
               </section>
             )}
 
-            {/* Girl Names */}
+            {/* Girl Names from DB */}
             {girlNames.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -215,6 +243,177 @@ export default function NakshatraPage({ params }: Props) {
                   </p>
                 )}
               </section>
+            )}
+
+            {/* SEO Curated Names Sections */}
+            {seo && (
+              <>
+                {/* Popular Names */}
+                <section className="rounded-2xl border border-amber-100 bg-amber-50/50 p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500" fill="currentColor" />
+                    Popular {nakshatra.name} Names
+                  </h2>
+                  <p className="text-sm text-gray-500 mb-5">
+                    Time-tested, widely loved names for {nakshatra.name} nakshatra children
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {seo.popularNames.map((n) => (
+                      <div
+                        key={n.name}
+                        className="rounded-xl bg-white border border-amber-100 p-4 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-gray-900">{n.name}</span>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              n.gender === "boy"
+                                ? "bg-blue-50 text-blue-600"
+                                : n.gender === "girl"
+                                ? "bg-pink-50 text-pink-600"
+                                : "bg-purple-50 text-purple-600"
+                            }`}
+                          >
+                            {n.gender}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 leading-snug">{n.meaning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Unique Names */}
+                <section className="rounded-2xl border border-purple-100 bg-purple-50/30 p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-500" />
+                    Unique {nakshatra.name} Names
+                  </h2>
+                  <p className="text-sm text-gray-500 mb-5">
+                    Rare and distinctive names with deep roots in Sanskrit and Vedic tradition
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {seo.uniqueNames.map((n) => (
+                      <div
+                        key={n.name}
+                        className="rounded-xl bg-white border border-purple-100 p-4 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-gray-900">{n.name}</span>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              n.gender === "boy"
+                                ? "bg-blue-50 text-blue-600"
+                                : n.gender === "girl"
+                                ? "bg-pink-50 text-pink-600"
+                                : "bg-purple-50 text-purple-600"
+                            }`}
+                          >
+                            {n.gender}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 leading-snug">{n.meaning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Modern Names */}
+                <section className="rounded-2xl border border-green-100 bg-green-50/30 p-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-lg">✨</span>
+                    Modern {nakshatra.name} Names
+                  </h2>
+                  <p className="text-sm text-gray-500 mb-5">
+                    Contemporary names that honor the nakshatra while feeling fresh and current
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {seo.modernNames.map((n) => (
+                      <div
+                        key={n.name}
+                        className="rounded-xl bg-white border border-green-100 p-4 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-gray-900">{n.name}</span>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              n.gender === "boy"
+                                ? "bg-blue-50 text-blue-600"
+                                : n.gender === "girl"
+                                ? "bg-pink-50 text-pink-600"
+                                : "bg-purple-50 text-purple-600"
+                            }`}
+                          >
+                            {n.gender}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 leading-snug">{n.meaning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Significance & Traditions */}
+                <div className="grid gap-6 md:grid-cols-2">
+                  <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <h2 className="text-lg font-bold text-gray-900 mb-3">
+                      Significance & Shakti
+                    </h2>
+                    <div className="text-sm text-gray-600 leading-relaxed space-y-3">
+                      {seo.significance.split("\n\n").map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                  </section>
+                  <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <h2 className="text-lg font-bold text-gray-900 mb-3">
+                      Naming Traditions
+                    </h2>
+                    <div className="text-sm text-gray-600 leading-relaxed space-y-3">
+                      {seo.namingTraditions.split("\n\n").map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+
+                {/* Tips for Parents */}
+                <section className="rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 to-amber-50 p-6">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span>💡</span> Tips for Parents
+                  </h2>
+                  <div className="text-sm text-gray-700 leading-relaxed space-y-3">
+                    {seo.tipsForParents.split("\n\n").map((para, i) => (
+                      <p key={i}>{para}</p>
+                    ))}
+                  </div>
+                </section>
+
+                {/* FAQ Section */}
+                <section>
+                  <div className="flex items-center gap-2 mb-6">
+                    <HelpCircle className="h-5 w-5 text-orange-500" />
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Frequently Asked Questions
+                    </h2>
+                  </div>
+                  <div className="space-y-4">
+                    {seo.faqs.map((faq, i) => (
+                      <div
+                        key={i}
+                        className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+                      >
+                        <h3 className="font-semibold text-gray-900 mb-2">
+                          {faq.question}
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </>
             )}
 
             {/* All Nakshatras link */}
