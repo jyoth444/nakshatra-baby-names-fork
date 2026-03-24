@@ -13,14 +13,20 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [genderFilter, setGenderFilter] = useState<"all" | "boy" | "girl">("all");
   const [originFilter, setOriginFilter] = useState("all");
+  const [nakshatraFilter, setNakshatraFilter] = useState("all");
 
   const origins = useMemo(() => {
     const set = new Set(allNames.map((n) => n.origin));
     return ["all", ...Array.from(set).sort()];
   }, []);
 
+  const nakshatras = useMemo(() => {
+    const set = new Set(allNames.flatMap((n) => n.nakshatra));
+    return ["all", ...Array.from(set).sort()];
+  }, []);
+
   const results = useMemo(() => {
-    if (!query && genderFilter === "all" && originFilter === "all") return [];
+    if (!query && genderFilter === "all" && originFilter === "all" && nakshatraFilter === "all") return [];
 
     return allNames.filter((name) => {
       const matchesQuery =
@@ -34,11 +40,14 @@ export default function SearchPage() {
       const matchesOrigin =
         originFilter === "all" || name.origin === originFilter;
 
-      return matchesQuery && matchesGender && matchesOrigin;
-    });
-  }, [query, genderFilter, originFilter]);
+      const matchesNakshatra =
+        nakshatraFilter === "all" || name.nakshatra.includes(nakshatraFilter);
 
-  const hasFilters = query || genderFilter !== "all" || originFilter !== "all";
+      return matchesQuery && matchesGender && matchesOrigin && matchesNakshatra;
+    });
+  }, [query, genderFilter, originFilter, nakshatraFilter]);
+
+  const hasFilters = query || genderFilter !== "all" || originFilter !== "all" || nakshatraFilter !== "all";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -113,9 +122,22 @@ export default function SearchPage() {
             ))}
           </select>
 
+          {/* Nakshatra Filter */}
+          <select
+            value={nakshatraFilter}
+            onChange={(e) => setNakshatraFilter(e.target.value)}
+            className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 focus:border-orange-400 focus:outline-none"
+          >
+            {nakshatras.map((n) => (
+              <option key={n} value={n}>
+                {n === "all" ? "All Nakshatras" : `${n} Nakshatra`}
+              </option>
+            ))}
+          </select>
+
           {hasFilters && (
             <button
-              onClick={() => { setQuery(""); setGenderFilter("all"); setOriginFilter("all"); }}
+              onClick={() => { setQuery(""); setGenderFilter("all"); setOriginFilter("all"); setNakshatraFilter("all"); }}
               className="ml-auto text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1"
             >
               <X className="h-3.5 w-3.5" />
