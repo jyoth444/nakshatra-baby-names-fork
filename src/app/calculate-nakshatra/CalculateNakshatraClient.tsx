@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Star, Sparkles, Heart, Wand2, ChevronDown } from "lucide-react";
+import { Star, Sparkles, Heart, Wand2, ChevronDown, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import HeroSection from "@/components/HeroSection";
 import BirthDetailsForm from "@/components/BirthDetailsForm";
 import NakshatraResultCard from "@/components/NakshatraResultCard";
@@ -10,6 +11,7 @@ import AINameGenerator from "@/components/AINameGenerator";
 import FavouriteNames from "@/components/FavouriteNames";
 import { useFavourites } from "@/hooks/useFavourites";
 import type { NakshatraResult } from "@/utils/nakshatraCalculator";
+import { buildResultId } from "@/utils/astrology";
 
 type ActiveTab = "names" | "ai" | "favourites";
 
@@ -82,7 +84,7 @@ export default function CalculateNakshatraClient() {
             {/* Result summary banner */}
             <div className="rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 p-px shadow-lg">
               <div className="rounded-2xl bg-white dark:bg-gray-900 p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div>
                     <p className="text-sm font-medium text-orange-500 uppercase tracking-wide mb-1">
                       Calculation Complete
@@ -99,18 +101,28 @@ export default function CalculateNakshatraClient() {
                       <strong>{result.deity}</strong>
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mr-1">
-                      Your syllables:
-                    </p>
-                    {result.syllables.map((s) => (
-                      <span
-                        key={s}
-                        className="inline-flex items-center rounded-lg bg-orange-500 text-white text-base font-bold px-4 py-1.5 shadow"
-                      >
-                        {s}
-                      </span>
-                    ))}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mr-1">
+                        Your syllables:
+                      </p>
+                      {result.syllables.map((s) => (
+                        <span
+                          key={s}
+                          className="inline-flex items-center rounded-lg bg-orange-500 text-white text-base font-bold px-4 py-1.5 shadow"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                    {/* Link to full result page */}
+                    <Link
+                      href={`/result/${buildResultId(result.nakshatra, result.pada)}`}
+                      className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 transition-colors"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      View Full {result.nakshatra} Pada {result.pada} Report
+                    </Link>
                   </div>
                 </div>
 

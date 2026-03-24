@@ -6,6 +6,8 @@ import { NAKSHATRA_DATA, getNakshatraBySlug } from "@/lib/nakshatraData";
 import { getNamesByNakshatra } from "@/lib/nameUtils";
 import { getNakshatraSEOContent } from "@/lib/nakshatraSEOContent";
 import NameCard from "@/components/shared/NameCard";
+import AdSlot from "@/components/shared/AdSlot";
+import EmailCapture from "@/components/shared/EmailCapture";
 
 interface Props {
   params: { star: string };
@@ -415,6 +417,12 @@ export default function NakshatraPage({ params }: Props) {
                 </section>
               </>
             )}
+
+            {/* Ad slot — mid content */}
+            <AdSlot format="horizontal" slot="1234567890" />
+
+            {/* Email capture */}
+            <EmailCapture variant="inline" />
 
             {/* All Nakshatras link */}
             <div className="rounded-2xl border border-dashed border-orange-300 bg-orange-50/50 p-6 text-center">
