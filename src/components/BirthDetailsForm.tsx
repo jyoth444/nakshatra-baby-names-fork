@@ -33,7 +33,13 @@ export default function BirthDetailsForm({ onResult }: BirthDetailsFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+      setError("");
+
+    if (!location || location.trim() === "") {
+       setError("Please enter birth location.");
+      return;
+    }
+
 
     if (!dateOfBirth || !timeOfBirth) {
       setError("Please enter both date and time of birth.");
@@ -42,7 +48,7 @@ export default function BirthDetailsForm({ onResult }: BirthDetailsFormProps) {
 
     setIsLoading(true);
     try {
-      const result = await calculateNakshatraAction(dateOfBirth, timeOfBirth);
+      const result = await calculateNakshatraAction(dateOfBirth, timeOfBirth, location);
       onResult(result);
     } catch (err) {
       setError("Failed to calculate Nakshatra. Please try again.");
@@ -102,7 +108,7 @@ export default function BirthDetailsForm({ onResult }: BirthDetailsFormProps) {
             />
           </div>
 
-          {/* Location (Optional) */}
+          {/* Location */}
           <div className="space-y-2">
             <Label
               htmlFor="location"
@@ -121,6 +127,7 @@ export default function BirthDetailsForm({ onResult }: BirthDetailsFormProps) {
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g., Mumbai, India"
               className="border-gray-200 dark:border-gray-700 focus:ring-orange-500 focus:border-orange-500"
+              required
             />
           </div>
 

@@ -7,15 +7,26 @@
 
 import { calculateNakshatra, type NakshatraResult } from "@/utils/nakshatraCalculator";
 import { searchName, findSimilarNames, filterNames, type BabyName } from "@/utils/nameFilter";
+import { getCoordinates } from "@/utils/location";
 
 /**
  * Server action to calculate Nakshatra from birth details.
  */
 export async function calculateNakshatraAction(
   dateOfBirth: string,
-  timeOfBirth: string
+  timeOfBirth: string,
+  location: string
 ): Promise<NakshatraResult> {
-  return calculateNakshatra(dateOfBirth, timeOfBirth);
+
+  const coords = await getCoordinates(location);
+
+  return calculateNakshatra(
+    dateOfBirth,
+    timeOfBirth,
+    coords.lat,
+    coords.lng,
+  );
+
 }
 
 /**

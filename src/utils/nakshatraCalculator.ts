@@ -124,11 +124,15 @@ function getNakshatraFromLongitude(longitude: number): {
  * @returns NakshatraResult with all calculated details
  */
 export function calculateNakshatra(
-  dateOfBirth: string,
-  timeOfBirth: string
-): NakshatraResult {
-  const [year, month, day] = dateOfBirth.split("-").map(Number);
-  const [hours, minutes] = timeOfBirth.split(":").map(Number);
+dateOfBirth: string, timeOfBirth: string, lat: number, lng: number): NakshatraResult {
+    const [year, month, day] = dateOfBirth.split("-").map(Number);
+    const [hours, minutes] = timeOfBirth.split(":").map(Number);
+
+  if (lat == null || lng == null) {
+    throw new Error("Invalid location coordinates");
+  }
+
+  console.log("Latitude:", lat, "Longitude:", lng);
 
   // Convert IST to UT (IST = UT + 5:30)
   let utDecimalHour = hours + minutes / 60 - 5.5;
