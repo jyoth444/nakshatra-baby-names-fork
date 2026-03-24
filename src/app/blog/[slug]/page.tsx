@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Clock, Tag, ChevronRight } from "lucide-react";
 import { BLOG_POSTS, getBlogPostBySlug } from "@/lib/blogData";
+import AdSlot from "@/components/shared/AdSlot";
+import EmailCapture from "@/components/shared/EmailCapture";
 
 interface Props {
   params: { slug: string };
@@ -153,6 +155,16 @@ export default function BlogPostPage({ params }: Props) {
         <article className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <div className="prose-like">{renderContent(post.content)}</div>
         </article>
+
+        {/* Ad slot — after article */}
+        <div className="mt-8">
+          <AdSlot format="horizontal" slot="3456789012" />
+        </div>
+
+        {/* Email capture */}
+        <div className="mt-8">
+          <EmailCapture variant="banner" />
+        </div>
 
         {/* CTA */}
         <div className="mt-10 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 p-8 text-white text-center">

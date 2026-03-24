@@ -6,7 +6,7 @@
  */
 
 import { useState } from "react";
-import { Sparkles, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, Wand2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -48,17 +48,20 @@ export default function AINameGenerator(props: AINameGeneratorProps) {
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAI, setIsAI] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleGenerate() {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       const result = await generateNamesWithAI(prompt);
       setGeneratedNames(result.names);
       setIsAI(result.isAI);
-    } catch (error) {
-      console.error("AI generation error:", error);
+    } catch (err) {
+      console.error("AI generation error:", err);
+      setError("Something went wrong while generating names. Please try again.");
     }
     setIsLoading(false);
   }
@@ -112,6 +115,13 @@ export default function AINameGenerator(props: AINameGeneratorProps) {
             rows={3}
             className="border-gray-200 dark:border-gray-700 resize-none"
           />
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <Button
             onClick={handleGenerate}
